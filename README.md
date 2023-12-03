@@ -4,3 +4,8 @@ This is a simple package scraper to do alien conversions en masse for testing in
 Alien prefers these to be run as root to be able to chown things together. 
 
 To build the pytorch Docker image, run: `podman build -f ./docker/RHPyTorch.Dockerfile ./`
+
+You'll want to complete the build on a RH machine with podman, because otherwise your entitlement won't mount in. You can add in a RUN line to activate a subscription on a developer account:
+```
+RUN subscription-manager register --username=${USER} --password=${PASS} && subscription-manager attach
+```

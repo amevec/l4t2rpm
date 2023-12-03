@@ -6,12 +6,7 @@ RUN cd l4t2rpm/ && python3 -m pip install -r requirements.txt && python3 l4t2rpm
 
 FROM registry.access.redhat.com/ubi9/ubi
 
-ARG PASS
-ARG USER
 ARG TORCH_INSTALL="https://developer.download.nvidia.cn/compute/redist/jp/v511/pytorch/torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl"
-
-# Attach subscription to container
-RUN subscription-manager register --username=${USER} --password=${PASS} && subscription-manager attach
 
 # Install essential packages and download necessary files
 RUN dnf update && dnf install -y createrepo gcc openssl-devel bzip2-devel libffi-devel zlib-devel wget make
