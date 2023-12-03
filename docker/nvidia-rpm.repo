@@ -1,0 +1,5 @@
+[nvidia]
+name=Local NVIDIA repo
+baseurl=file:///var/repos/nvidia-rpms/
+enabled=1
+gpgcheck=0
