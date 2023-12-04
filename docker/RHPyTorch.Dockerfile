@@ -1,7 +1,8 @@
 FROM python:3.9-slim AS builder
+LABEL stage=builder
 
 RUN apt-get update && apt-get install -y git alien python3 python3-pip
-RUN git clone https://github.com/amevec/l4t2rpm.git
+COPY src/ /l4t2rpm/
 RUN cd l4t2rpm/ && python3 -m pip install -r requirements.txt && python3 l4t2rpm.py
 
 FROM registry.access.redhat.com/ubi9/ubi
@@ -31,7 +32,7 @@ RUN python3.8 -m ensurepip
 RUN mkdir -p /var/repos/nvidia-rpms/
 COPY --from=builder /l4t2rpm/l4t2rpm/cache/5.1.2/common/rpms/ /var/repos/nvidia-rpms/
 RUN createrepo /var/repos/nvidia-rpms/
-COPY ./nvidia-rpm.repo /etc/yum.repos.d/nvidia-rpm.repo
+COPY ./docker/nvidia-rpm.repo /etc/yum.repos.d/nvidia-rpm.repo
 
 # Do some broken RPM stuff because we have to (we have no python 3.8... Red Hat)
 RUN rpm -i --nodeps \
@@ -40,7 +41,6 @@ RUN rpm -i --nodeps \
            /var/repos/nvidia-rpms/python3-libnvinfer-8.5.2-2.aarch64.rpm
 
 # Enable EPEL
-RUN subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 
 RUN dnf update && dnf install -y \
@@ -51,9 +51,9 @@ RUN dnf update && dnf install -y \
                       libcufft-11-4 \
                       cuda-cudart-11-4 \
                       cuda-nvtx-11-4 \
-					  cuda-nvrtc-11-4 \
+                      cuda-nvrtc-11-4 \
                       numactl \
-                      openblas-devel
+                      openblas
 
 # Link libraries
 RUN ln -s /usr/local/cuda-11.4/ /usr/local/cuda && ln -s /usr/local/cuda /usr/lib/cuda
@@ -67,3 +67,7 @@ RUN yum remove -y createrepo wget make && yum clean all
 
 # Clean up repo files
 RUN rm -rf /var/repos/nvidia-rpms/ && rm -rf /etc/yum.repos.d/nvidia-rpm.repo
+
+# Set mandatory environment settings
+ENV NVIDIA_VISIBLE_DEVICE="all"
+ENV NVIDIA_DRIVER_CAPABILITIES="all"

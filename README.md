@@ -9,3 +9,5 @@ You'll want to complete the build on a RH machine with podman, because otherwise
 ```
 RUN subscription-manager register --username=${USER} --password=${PASS} && subscription-manager attach
 ```
+
+This build will also require the codereadybuilder repo: `Subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms`
